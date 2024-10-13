@@ -6,4 +6,7 @@ func main() {
 
 	// example for using singleflight
 	simulateSingleflight()
+
+	// example for using in memory cache
+	simulateInMemoryCache()
 }

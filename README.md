@@ -8,7 +8,7 @@ distributed system pattern best practices to achieve stability and resilience:
 - [Circuit Breaker Pattern](#circuit-breaker-pattern)
 - [LRU (Least Recently Used) In-Memory Cache Pattern](#lru-in-memory-cache-pattern)
 - [Singleflight Pattern](#singleflight-pattern)
-- [Request Timeout](#request-timeout)
+- [Request Timeout](#request-timeout-deadline)
 
 ## Circuit Breaker Pattern
 
@@ -129,9 +129,7 @@ TBD
 
 check example folder to see detailed implementation use cases.
 
-- how to perform external call with
-  callwrapper ([example](https://github.com/rizanw/go-callwrapper/blob/main/example/repo.go)))
-- when you need to have set deadline
-  call ([example usage](https://github.com/rizanw/go-callwrapper/blob/main/example/timeout.go))
-- when you need to reduce upstream load with
-  singleflight ([example usage](https://github.com/rizanw/go-callwrapper/blob/main/example/singleflight.go))
+- how to perform external call with callwrapper ([example](https://github.com/rizanw/go-callwrapper/blob/main/example/repo.go))
+- when you need to have set deadline call ([example usage](https://github.com/rizanw/go-callwrapper/blob/main/example/ttl.go))
+- when you need to reduce upstream load with singleflight ([example usage](https://github.com/rizanw/go-callwrapper/blob/main/example/singleflight.go))
+- when you need to fetch frequent access and rarely changes data using in-memory cache ([example usage](https://github.com/rizanw/go-callwrapper/blob/main/example/cache.go))
