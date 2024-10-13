@@ -52,7 +52,7 @@ func getPost(ctx context.Context, cw *callwrapper.CallWrapper, postID int) (map[
 		mu.Unlock()
 
 		return result, nil
-	})
+	}, callwrapper.WithCacheTTL(30))
 	if err != nil {
 		return nil, err
 	}
