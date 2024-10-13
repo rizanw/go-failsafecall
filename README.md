@@ -96,6 +96,34 @@ for operations that may take an uncertain amount of time and helps prevent resou
 <a href="https://pkg.go.dev/context#WithTimeout">reference</a>
 )</p>
 
+
+## Architectural Flow Diagram Design
+
+when all features are enabled, the execution func described as follows:
+
+```mermaid
+sequenceDiagram
+    participant cw as cw.Call
+    participant td as TimeoutDeadline
+    participant c as In-Mem Cache
+    participant sf as Singleflight
+    participant cb as CircuitBreaker
+    participant fn as fn function
+    cw ->> td: Execute
+    td ->> td: Set Context Deadline
+    td ->> c: Execute
+    c -->> cw: Return data if cache exist
+    c ->> sf: Execute
+    sf ->> cb: Execute
+    cb -->> sf: Return Error if Breaker open
+    cb ->> fn: Execute
+    fn ->> cb: Result or Error
+    cb ->> sf: Result or Error
+    sf ->> c: Result or Error
+    c ->> c: Set Cache if Result
+    c ->> cw: Result or Error
+```
+
 ## Quick Start
 
 the callwrapper provides a simple way with 2 steps:
