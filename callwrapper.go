@@ -18,7 +18,7 @@ type Config struct {
 	Singleflight bool
 
 	// Circuit Breaker configuration
-	// note: TODO
+	// note: setup config with nil means disable feature, empty config means using default configuration
 	CBConfig *CBConfig
 
 	// In-Memory Cache configuration
@@ -32,6 +32,7 @@ type CallWrapper struct {
 	callTimeout time.Duration
 	sf          *singleflight.Group
 	cache       *cache
+	cb          *circuitBreaker
 }
 
 // New creates CallWrapper
@@ -40,6 +41,7 @@ func New(cfg Config) *CallWrapper {
 		callTimeout time.Duration
 		sf          *singleflight.Group
 		c           *cache
+		cb          *circuitBreaker
 	)
 
 	if cfg.CallTimeout > 0 {
@@ -54,10 +56,15 @@ func New(cfg Config) *CallWrapper {
 		c = newCache(cfg.CacheConfig)
 	}
 
+	if cfg.CBConfig != nil {
+		cb = newCircuitBreaker(cfg.CBConfig)
+	}
+
 	return &CallWrapper{
 		callTimeout: callTimeout,
 		sf:          sf,
 		cache:       c,
+		cb:          cb,
 	}
 }
 
@@ -134,7 +141,13 @@ func (cw *CallWrapper) call(ctx context.Context, fn func(ctx context.Context) (i
 		err error
 	)
 
-	res, err = fn(ctx)
+	if cw.cb != nil {
+		// with circuit-breaker
+		res, err = cw.cb.Execute(func() (interface{}, error) { return fn(ctx) })
+	} else {
+		// without circuit-breaker
+		res, err = fn(ctx)
+	}
 	if err != nil {
 		return nil, err
 	}

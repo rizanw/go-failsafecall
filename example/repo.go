@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -26,6 +27,11 @@ func getPost(ctx context.Context, cw *callwrapper.CallWrapper, postID int) (map[
 
 	// use callwrapper to wrap fetching data
 	resp, err := cw.Call(ctx, callKey, func(ctx context.Context) (interface{}, error) {
+		if postID == 9 {
+			// trigger cb becomes half-open and then open
+			return nil, errors.New("post not found")
+		}
+
 		// simulate fetching data inside this func(ctx context.Context) (interface{}, error):
 		var result map[string]interface{}
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)

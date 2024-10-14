@@ -21,8 +21,7 @@ from trying to execute an operation that is likely to fail.
 **Use this pattern:**
 
 - To prevent an application from attempting to invoke an external service or access a shared resource if this operation
-  is
-  highly likely to fail.
+  is highly likely to fail.
 
 **This pattern might not be suitable:**
 
@@ -161,3 +160,4 @@ check example folder to see detailed implementation use cases.
 - when you need to have set deadline call ([example usage](https://github.com/rizanw/go-callwrapper/blob/main/example/ttl.go))
 - when you need to reduce upstream load with singleflight ([example usage](https://github.com/rizanw/go-callwrapper/blob/main/example/singleflight.go))
 - when you need to fetch frequent access and rarely changes data using in-memory cache ([example usage](https://github.com/rizanw/go-callwrapper/blob/main/example/cache.go))
+- when you need to prevent likely fail request with circuit-breaker ([example usage](https://github.com/rizanw/go-callwrapper/blob/main/example/circuitbreaker.go))
