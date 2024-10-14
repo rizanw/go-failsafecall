@@ -9,4 +9,7 @@ func main() {
 
 	// example for using in memory cache
 	simulateInMemoryCache()
+
+	// example for using circuit breaker
+	simulateCircuitBreaker()
 }

@@ -21,8 +21,7 @@ from trying to execute an operation that is likely to fail.
 **Use this pattern:**
 
 - To prevent an application from attempting to invoke an external service or access a shared resource if this operation
-  is
-  highly likely to fail.
+  is highly likely to fail.
 
 **This pattern might not be suitable:**
 
@@ -133,8 +132,18 @@ the callwrapper provides a simple way with 2 steps:
 ```go
 
 cw := callwrapper.New(callwrapper.Config{
-TimeoutDeadline: 500, // in milliseconds
-Singleflight: true,
+    TimeoutDeadline: 500, // in milliseconds
+    Singleflight: true,
+    CBConfig: &callwrapper.CBConfig{
+		OpenTimeoutSec: 60, // in seconds 
+		HalfOpenMaxRequests: 2, 
+		CloseFailureRatioThreshold: 0.5, 
+		CloseMinRequests: 10, 
+		WhitelistedErrors: []error{sql.ErrNoRows},
+    },
+    InMemCacheConfig: &callwrapper.InMemCacheConfig{
+        TTLSec: 3600, // 1hour in seconds
+    }
 })
 
 ```
@@ -153,6 +162,12 @@ return getData(ctx)
 TBD
 ```
 
+## Option
+
+```
+TBD
+```
+
 ## Example Usage
 
 check example folder to see detailed implementation use cases.
@@ -161,3 +176,4 @@ check example folder to see detailed implementation use cases.
 - when you need to have set deadline call ([example usage](https://github.com/rizanw/go-callwrapper/blob/main/example/ttl.go))
 - when you need to reduce upstream load with singleflight ([example usage](https://github.com/rizanw/go-callwrapper/blob/main/example/singleflight.go))
 - when you need to fetch frequent access and rarely changes data using in-memory cache ([example usage](https://github.com/rizanw/go-callwrapper/blob/main/example/cache.go))
+- when you need to prevent likely fail request with circuit-breaker ([example usage](https://github.com/rizanw/go-callwrapper/blob/main/example/circuitbreaker.go))
