@@ -15,7 +15,7 @@ type CBConfig struct {
 	// HalfOpenMaxRequests is also used for calculate minimum success to make CircuitBreaker is being close state again.
 	HalfOpenMaxRequests int
 
-	// FailureRatioThreshold is failure threshold percentage before CircuitBreaker is being open state (default: 0.7).
+	// FailureRatioThreshold is failure threshold percentage before CircuitBreaker is being open state (default: 0.5).
 	CloseFailureRatioThreshold float64
 
 	// CloseMinRequestThreshold is the minimum number of request allowed before CircuitBreaker is being open state (default: 10).
@@ -41,7 +41,7 @@ func newCircuitBreaker(cfg *CBConfig) *circuitBreaker {
 		OpenTimeout                time.Duration = 60 * time.Second
 		HalfOpenMaxRequests        uint32        = 1
 		CloseMinRequests           uint32        = 10
-		CloseFailureRatioThreshold float64       = 0.7
+		CloseFailureRatioThreshold float64       = 0.5
 	)
 
 	st.Name = defaultCBName

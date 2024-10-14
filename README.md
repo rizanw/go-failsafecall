@@ -132,8 +132,18 @@ the callwrapper provides a simple way with 2 steps:
 ```go
 
 cw := callwrapper.New(callwrapper.Config{
-TimeoutDeadline: 500, // in milliseconds
-Singleflight: true,
+    TimeoutDeadline: 500, // in milliseconds
+    Singleflight: true,
+    CBConfig: &callwrapper.CBConfig{
+		OpenTimeoutSec: 60, // in seconds 
+		HalfOpenMaxRequests: 2, 
+		CloseFailureRatioThreshold: 0.5, 
+		CloseMinRequests: 10, 
+		WhitelistedErrors: []error{sql.ErrNoRows},
+    },
+    InMemCacheConfig: &callwrapper.InMemCacheConfig{
+        TTLSec: 3600, // 1hour in seconds
+    }
 })
 
 ```
@@ -147,6 +157,12 @@ return getData(ctx)
 ```
 
 ## Configuration
+
+```
+TBD
+```
+
+## Option
 
 ```
 TBD
