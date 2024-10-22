@@ -1,6 +1,6 @@
-# go-callwrapper
+# go-failsafecall
 
-go-callwrapper is basically a wrapper function designed to perform external calls, implementing commonly used
+go-failsafecall is basically a wrapper function designed to perform external calls and implementing commonly used
 distributed system pattern best practices to achieve stability and resilience:
 
 ## Features
@@ -36,7 +36,7 @@ from trying to execute an operation that is likely to fail.
 ## LRU In-Memory Cache Pattern
 
 In-memory caching patterns are techniques used to temporarily store frequently accessed data in memory to improve
-application performance and reduce latency. In this callwrapper package will implement Least Recently Used (LRU) policy.
+application performance and reduce latency. In this failsafecall package will implement Least Recently Used (LRU) policy.
 The LRU Cache operates on the principle that the data most recently accessed is likely to be accessed again in the near
 future. By evicting the least recently accessed items first, LRU Cache ensures that the most relevant data remains
 available in the cache.
@@ -125,23 +125,23 @@ sequenceDiagram
 
 ## Quick Start
 
-the callwrapper provides a simple way with 2 steps:
+the failsafecall provides a simple way with 2 steps:
 
-1. create the call wrapper instance as `cw`
+1. create the wrapper instance as `fsw`
 
 ```go
 
-cw := callwrapper.New(callwrapper.Config{
+fsw := failsafecall.New(failsafecall.Config{
     TimeoutDeadline: 500, // in milliseconds
     Singleflight: true,
-    CBConfig: &callwrapper.CBConfig{
+    CBConfig: &failsafecall.CBConfig{
 		OpenTimeoutSec: 60, // in seconds 
 		HalfOpenMaxRequests: 2, 
 		CloseFailureRatioThreshold: 0.5, 
 		CloseMinRequests: 10, 
 		WhitelistedErrors: []error{sql.ErrNoRows},
     },
-    InMemCacheConfig: &callwrapper.InMemCacheConfig{
+    InMemCacheConfig: &failsafecall.InMemCacheConfig{
         TTLSec: 3600, // 1hour in seconds
     }
 })
@@ -172,8 +172,8 @@ TBD
 
 check example folder to see detailed implementation use cases.
 
-- how to perform external call with callwrapper ([example](https://github.com/rizanw/go-callwrapper/blob/main/example/repo.go))
-- when you need to have set deadline call ([example usage](https://github.com/rizanw/go-callwrapper/blob/main/example/ttl.go))
-- when you need to reduce upstream load with singleflight ([example usage](https://github.com/rizanw/go-callwrapper/blob/main/example/singleflight.go))
-- when you need to fetch frequent access and rarely changes data using in-memory cache ([example usage](https://github.com/rizanw/go-callwrapper/blob/main/example/cache.go))
-- when you need to prevent likely fail request with circuit-breaker ([example usage](https://github.com/rizanw/go-callwrapper/blob/main/example/circuitbreaker.go))
+- how to perform external call with failsafecall ([example](https://github.com/rizanw/go-failsafecall/blob/main/example/repo.go))
+- when you need to have set deadline call ([example usage](https://github.com/rizanw/go-failsafecall/blob/main/example/ttl.go))
+- when you need to reduce upstream load with singleflight ([example usage](https://github.com/rizanw/go-failsafecall/blob/main/example/singleflight.go))
+- when you need to fetch frequent access and rarely changes data using in-memory cache ([example usage](https://github.com/rizanw/go-failsafecall/blob/main/example/cache.go))
+- when you need to prevent likely fail request with circuit-breaker ([example usage](https://github.com/rizanw/go-failsafecall/blob/main/example/circuitbreaker.go))
