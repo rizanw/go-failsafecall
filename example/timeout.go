@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/rizanw/go-callwrapper"
+	"github.com/rizanw/go-failsafecall"
 )
 
 // simulateTimeoutCall is an example when you expect to have request timeout for external service
@@ -17,7 +17,7 @@ func simulateTimeoutCall() {
 		postIDs = []int{1, 2, 3, 1, 2, 3, 1, 1, 2, 4}
 	)
 
-	cw := callwrapper.New(callwrapper.Config{
+	fsc := failsafecall.New(failsafecall.Config{
 		CallTimeout: 500, // 500ms
 	})
 
@@ -30,7 +30,7 @@ func simulateTimeoutCall() {
 			defer wg.Done()
 
 			// fetching data from repository
-			data, err := getPost(ctx, cw, id)
+			data, err := getPost(ctx, fsc, id)
 			if err != nil {
 				// since inside repo we expect each request will respond about 2s and our timeout is 5ms
 				// all fetching data will return `context deadline exceeded`

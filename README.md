@@ -36,7 +36,8 @@ from trying to execute an operation that is likely to fail.
 ## LRU In-Memory Cache Pattern
 
 In-memory caching patterns are techniques used to temporarily store frequently accessed data in memory to improve
-application performance and reduce latency. In this failsafecall package will implement Least Recently Used (LRU) policy.
+application performance and reduce latency. In this failsafecall package will implement Least Recently Used (LRU)
+policy.
 The LRU Cache operates on the principle that the data most recently accessed is likely to be accessed again in the near
 future. By evicting the least recently accessed items first, LRU Cache ensures that the most relevant data remains
 available in the cache.
@@ -95,23 +96,22 @@ for operations that may take an uncertain amount of time and helps prevent resou
 <a href="https://pkg.go.dev/context#WithTimeout">reference</a>
 )</p>
 
-
 ## Architectural Flow Diagram Design
 
 when all features are enabled, the execution func described as follows:
 
 ```mermaid
 sequenceDiagram
-    participant cw as cw.Call
+    participant fs as fs.Call
     participant td as TimeoutDeadline
     participant c as In-Mem Cache
     participant sf as Singleflight
     participant cb as CircuitBreaker
     participant fn as fn function
-    cw ->> td: Execute
+    fs ->> td: Execute
     td ->> td: Set Context Deadline
     td ->> c: Execute
-    c -->> cw: Return data if cache exist
+    c -->> fs: Return data if cache exist
     c ->> sf: Execute
     sf ->> cb: Execute
     cb -->> sf: Return Error if Breaker open
@@ -120,26 +120,26 @@ sequenceDiagram
     cb ->> sf: Result or Error
     sf ->> c: Result or Error
     c ->> c: Set Cache if Result
-    c ->> cw: Result or Error
+    c ->> fs: Result or Error
 ```
 
 ## Quick Start
 
 the failsafecall provides a simple way with 2 steps:
 
-1. create the wrapper instance as `fsw`
+1. create the wrapper instance as `fs`
 
 ```go
 
-fsw := failsafecall.New(failsafecall.Config{
+fs := failsafecall.New(failsafecall.Config{
     TimeoutDeadline: 500, // in milliseconds
     Singleflight: true,
     CBConfig: &failsafecall.CBConfig{
-		OpenTimeoutSec: 60, // in seconds 
-		HalfOpenMaxRequests: 2, 
-		CloseFailureRatioThreshold: 0.5, 
-		CloseMinRequests: 10, 
-		WhitelistedErrors: []error{sql.ErrNoRows},
+        OpenTimeoutSec: 60, // in seconds 
+        HalfOpenMaxRequests: 2,
+        CloseFailureRatioThreshold: 0.5,
+        CloseMinRequests: 10,
+        WhitelistedErrors: []error{sql.ErrNoRows},
     },
     InMemCacheConfig: &failsafecall.InMemCacheConfig{
         TTLSec: 3600, // 1hour in seconds
@@ -148,32 +148,84 @@ fsw := failsafecall.New(failsafecall.Config{
 
 ```
 
-2. use the `cw` instance to perform external call
+2. use the `fs` instance to perform external call
 
 ```go
-resp, err := cw.Call(ctx, callKey, func (ctx context.Context) (interface{}, error) {
-return getData(ctx)
+resp, err := fs.Call(ctx, callKey, func (ctx context.Context) (interface{}, error) {
+    return getData(ctx)
 })
 ```
 
 ## Configuration
 
-```
-TBD
-```
+below is list of available configuration:
+
+### Wrapper Configuration
+
+| Key          | type              | Description                           |
+|--------------|-------------------|---------------------------------------|
+| CallTimeout  | int               | set context timeout in milliseconds   |
+| Singleflight | bool              | toggle to enable singleflight feature |
+| CBConfig     | *CBConfig         | Circuit Breaker configuration         |
+| CacheConfig  | *InMemCacheConfig | In-Memory Cache configuration         |
+
+### Circuit Breaker Configuration
+
+| Key                        | type    | Description                                                                                              |
+|----------------------------|---------|----------------------------------------------------------------------------------------------------------|
+| OpenTimeoutSec             | int     | the period of the open state, after which the state of CircuitBreaker becomes half-open (default: 60)    |
+| HalfOpenMaxRequests        | int     | the maximum number of requests allowed to pass through when the CircuitBreaker is half-open (default: 1) |
+| CloseFailureRatioThreshold | float64 | failure threshold percentage before CircuitBreaker is being open state (default: 0.5)                    |
+| CloseMinRequests           | int     | the minimum number of request allowed before CircuitBreaker is being open state (default: 10)            |
+| WhitelistedErrors          | []error | errors marked as successful process (default: nil)                                                       |
+
+### In-Memory Cache Configuration
+
+| Key            | type | Description                                                                                                                                                                 |
+|----------------|------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| MaxSize        | int  | the maximum number size to store in the cache (default: 5000)                                                                                                               |
+| Buckets        | int  | ccache shards its internal map to provide a greater amount of concurrency. Must be a power of 2 (default: 16).                                                              |
+| GetsPerPromote | int  | the number of times an item is fetched before we promote it. For large caches with long TTLs, it normally isn't necessary to promote an item after every fetch (default: 3) |
+| ItemsToPrune   | int  | ItemsToPrune is the number of items to prune when we hit MaxSize. Freeing up more than 1 slot at a time improved performance (default: 500)                                 |
+| TTLSec         | int  | the number of duration that a cached item is considered valid or fresh. (default: 1)                                                                                        |
 
 ## Option
 
+Option use for update or override initiated configuration for specific use-cases
+
+### WithTimeoutDeadline(timeoutMs)
+
+to set CallTimeout context in milliseconds for specific call only.
+
+```go
+resp, err := fs.Call(ctx, key, GetData, failsafecall.WithTimeoutDeadline(30))
+if err != nil {
+    return nil, err
+}
 ```
-TBD
+
+### WithCacheTTL(TTLSec)
+
+to set TTL in-memory cache in seconds for specific call only.
+
+```go
+resp, err := fs.Call(ctx, key, GetData, failsafecall.WithCacheTTL(30))
+if err != nil {
+    return nil, err
+}
 ```
 
 ## Example Usage
 
 check example folder to see detailed implementation use cases.
 
-- how to perform external call with failsafecall ([example](https://github.com/rizanw/go-failsafecall/blob/main/example/repo.go))
-- when you need to have set deadline call ([example usage](https://github.com/rizanw/go-failsafecall/blob/main/example/ttl.go))
-- when you need to reduce upstream load with singleflight ([example usage](https://github.com/rizanw/go-failsafecall/blob/main/example/singleflight.go))
-- when you need to fetch frequent access and rarely changes data using in-memory cache ([example usage](https://github.com/rizanw/go-failsafecall/blob/main/example/cache.go))
-- when you need to prevent likely fail request with circuit-breaker ([example usage](https://github.com/rizanw/go-failsafecall/blob/main/example/circuitbreaker.go))
+- how to perform external call with
+  failsafecall ([example](https://github.com/rizanw/go-failsafecall/blob/main/example/repo.go))
+- when you need to have set deadline
+  call ([example usage](https://github.com/rizanw/go-failsafecall/blob/main/example/ttl.go))
+- when you need to reduce upstream load with
+  singleflight ([example usage](https://github.com/rizanw/go-failsafecall/blob/main/example/singleflight.go))
+- when you need to fetch frequent access and rarely changes data using in-memory
+  cache ([example usage](https://github.com/rizanw/go-failsafecall/blob/main/example/cache.go))
+- when you need to prevent likely fail request with
+  circuit-breaker ([example usage](https://github.com/rizanw/go-failsafecall/blob/main/example/circuitbreaker.go))

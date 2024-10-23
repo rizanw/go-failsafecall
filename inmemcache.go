@@ -1,4 +1,4 @@
-package callwrapper
+package failsafecall
 
 import (
 	"time"

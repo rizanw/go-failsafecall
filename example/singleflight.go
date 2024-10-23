@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/rizanw/go-callwrapper"
+	"github.com/rizanw/go-failsafecall"
 )
 
 // simulateSingleflight is an example when you expect to reduce/compress identical request to upstream
@@ -17,7 +17,7 @@ func simulateSingleflight() {
 		postIDs = []int{1, 2, 3, 1, 2, 3, 1, 1, 2, 4}
 	)
 
-	cw := callwrapper.New(callwrapper.Config{
+	fsc := failsafecall.New(failsafecall.Config{
 		Singleflight: true, // enable singleflight feature
 	})
 
@@ -30,7 +30,7 @@ func simulateSingleflight() {
 			defer wg.Done()
 
 			// fetching data from repository
-			data, err := getPost(ctx, cw, id)
+			data, err := getPost(ctx, fsc, id)
 			if err != nil {
 				fmt.Printf(">PostID:%v, Error:%v\n", id, err)
 			} else {
