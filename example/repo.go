@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/rizanw/go-callwrapper"
+	"github.com/rizanw/go-failsafecall"
 )
 
 var (
@@ -19,14 +19,14 @@ var (
 )
 
 // getPost simulates external call to fetch data from upstream (service/server/db/redis/etc)
-func getPost(ctx context.Context, cw *callwrapper.CallWrapper, postID int) (map[string]interface{}, error) {
+func getPost(ctx context.Context, fs *failsafecall.Wrapper, postID int) (map[string]interface{}, error) {
 	var (
 		url     = fmt.Sprintf("https://jsonplaceholder.typicode.com/posts/%d", postID)
 		callKey = fmt.Sprintf("post:%d", postID)
 	)
 
 	// use callwrapper to wrap fetching data
-	resp, err := cw.Call(ctx, callKey, func(ctx context.Context) (interface{}, error) {
+	resp, err := fs.Call(ctx, callKey, func(ctx context.Context) (interface{}, error) {
 		if postID == 9 {
 			// trigger cb becomes half-open and then open
 			return nil, errors.New("post not found")
@@ -58,7 +58,7 @@ func getPost(ctx context.Context, cw *callwrapper.CallWrapper, postID int) (map[
 		mu.Unlock()
 
 		return result, nil
-	}, callwrapper.WithCacheTTL(30))
+	}, failsafecall.WithCacheTTL(30))
 	if err != nil {
 		return nil, err
 	}

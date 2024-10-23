@@ -1,4 +1,4 @@
-module github.com/rizanw/go-callwrapper
+module github.com/rizanw/go-failsafecall
 
 go 1.21
 

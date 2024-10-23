@@ -1,4 +1,4 @@
-package callwrapper
+package failsafecall
 
 import (
 	"context"
@@ -7,13 +7,13 @@ import (
 	"golang.org/x/sync/singleflight"
 )
 
-// Config for CallWrapper configuration
+// Config for Wrapper configuration
 type Config struct {
 	// CallTimeout set context timeout in milliseconds
 	// note: use client with context to make it works!
 	CallTimeout int64
 
-	// Singleflight option
+	// Singleflight option to enable singleflight feature
 	// note: singleflight won't work without key, ensure provide unique key when using the `Call` function
 	Singleflight bool
 
@@ -28,15 +28,15 @@ type Config struct {
 	CacheConfig *InMemCacheConfig
 }
 
-type CallWrapper struct {
+type Wrapper struct {
 	callTimeout time.Duration
 	sf          *singleflight.Group
 	cache       *cache
 	cb          *circuitBreaker
 }
 
-// New creates CallWrapper
-func New(cfg Config) *CallWrapper {
+// New creates Wrapper
+func New(cfg Config) *Wrapper {
 	var (
 		callTimeout time.Duration
 		sf          *singleflight.Group
@@ -60,7 +60,7 @@ func New(cfg Config) *CallWrapper {
 		cb = newCircuitBreaker(cfg.CBConfig)
 	}
 
-	return &CallWrapper{
+	return &Wrapper{
 		callTimeout: callTimeout,
 		sf:          sf,
 		cache:       c,
@@ -69,7 +69,7 @@ func New(cfg Config) *CallWrapper {
 }
 
 // Call wraps the func call and implement the enabled resiliency patterns
-func (cw *CallWrapper) Call(ctx context.Context, key string, fn func(ctx context.Context) (interface{}, error), opts ...CallOption) (interface{}, error) {
+func (cw *Wrapper) Call(ctx context.Context, key string, fn func(ctx context.Context) (interface{}, error), opts ...CallOption) (interface{}, error) {
 	var (
 		res interface{}
 		err error
@@ -135,7 +135,7 @@ func (cw *CallWrapper) Call(ctx context.Context, key string, fn func(ctx context
 	return res, err
 }
 
-func (cw *CallWrapper) call(ctx context.Context, fn func(ctx context.Context) (interface{}, error)) (interface{}, error) {
+func (cw *Wrapper) call(ctx context.Context, fn func(ctx context.Context) (interface{}, error)) (interface{}, error) {
 	var (
 		res interface{}
 		err error
