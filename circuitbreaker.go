@@ -31,6 +31,15 @@ const (
 	defaultCBName = "circuit-breaker"
 )
 
+var (
+	// ErrCircuitOpen is returned when the circuit breaker is open and the call was rejected.
+	ErrCircuitOpen = gobreaker.ErrOpenState
+
+	// ErrTooManyRequests is returned when the circuit breaker is half-open and the
+	// number of trial requests has reached HalfOpenMaxRequests.
+	ErrTooManyRequests = gobreaker.ErrTooManyRequests
+)
+
 type circuitBreaker struct {
 	cb *gobreaker.CircuitBreaker[any]
 }

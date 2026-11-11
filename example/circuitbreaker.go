@@ -36,5 +36,5 @@ func simulateCircuitBreaker() {
 		}
 	}
 
-	fmt.Println("[simulateTimeoutCall] Time taken:", time.Since(now))
+	fmt.Println("[simulateCircuitBreaker] Time taken:", time.Since(now))
 }
