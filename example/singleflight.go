@@ -49,5 +49,5 @@ func simulateSingleflight() {
 	// - in:	1, 2, 3, 1, 2, 3, 1, 1, 2, 4
 	// - out:	3, 3, 2, 2, 2, 4, 1, 1, 1, 1 (potentially random, but grouped)
 	wg.Wait()
-	fmt.Println("[simulateTimeoutCall] Time taken:", time.Since(now))
+	fmt.Println("[simulateSingleflight] Time taken:", time.Since(now))
 }

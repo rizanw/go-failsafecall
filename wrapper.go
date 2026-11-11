@@ -108,20 +108,15 @@ func (cw *Wrapper) Call(ctx context.Context, key string, fn func(ctx context.Con
 		}
 	}
 
-	// do the call with or without singleflight
+	// do the call with or without singleflight. Singleflight sits outside the
+	// circuit breaker, so concurrent callers sharing one upstream call count as
+	// a single request for the breaker.
 	if cw.sf != nil && key != "" {
-		// call with singleflight
-		res, err = cw.call(ctx, func(ctx context.Context) (interface{}, error) {
-			sfRes, sfErr, _ := cw.sf.Do(key, func() (interface{}, error) {
-				return fn(ctx)
-			})
-			return sfRes, sfErr
+		res, err, _ = cw.sf.Do(key, func() (interface{}, error) {
+			return cw.call(ctx, fn)
 		})
 	} else {
-		// call without singleflight
-		res, err = cw.call(ctx, func(ctx context.Context) (interface{}, error) {
-			return fn(ctx)
-		})
+		res, err = cw.call(ctx, fn)
 	}
 	if err != nil {
 		return nil, err

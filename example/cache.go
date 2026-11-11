@@ -33,5 +33,5 @@ func simulateInMemoryCache() {
 		}
 	}
 
-	fmt.Println("[simulateTimeoutCall] Time taken:", time.Since(now))
+	fmt.Println("[simulateInMemoryCache] Time taken:", time.Since(now))
 }
